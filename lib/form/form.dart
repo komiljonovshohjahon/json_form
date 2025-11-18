@@ -1,16 +1,36 @@
 // TYPES START
 
 enum FormElementType {
-  text('string'),
-  checkbox('boolean'),
-  date('string', format: 'date'),
-  dateTime('string', format: 'date-time'),
-  select('string');
+  text('string', value: 'text_field', label: 'Text'),
+  checkbox('boolean', value: 'checkbox_field', label: 'Checkbox'),
+  date('string', value: 'date_field', label: 'Date', format: 'date'),
+  dateTime(
+    'string',
+    value: 'date_time_field',
+    label: 'Date & Time',
+    format: 'date-time',
+  ),
+  select('string', value: 'select_field', label: 'Dropdown');
 
-  const FormElementType(this.value, {this.format});
+  const FormElementType(
+    this.type, {
+    required this.value,
+    required this.label,
+    this.format,
+  });
 
+  final String type;
   final String value;
+  final String label;
   final String? format;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': value,
+      'label': label,
+      if (format != null) 'format': format,
+    };
+  }
 }
 
 abstract class FormElement<T> {
@@ -38,7 +58,8 @@ abstract class FormElement<T> {
 
   Map<String, dynamic> toJson() {
     return {
-      'type': type.value,
+      'type': type.type,
+      'type_value': type.value,
       'title': label,
       'required': isRequired,
       if (type.format != null) 'format': type.format,
@@ -61,6 +82,15 @@ class TextFormElement extends FormElement<String> {
     super.isRequired,
     super.initialValue,
   });
+
+  factory TextFormElement.fromJson(Map json) {
+    return TextFormElement(
+      field: json['title']?.toString() ?? '',
+      label: json['title']?.toString() ?? '',
+      isRequired: json['required'] as bool? ?? false,
+      initialValue: json['default']?.toString(),
+    );
+  }
 }
 
 class CheckboxFormElement extends FormElement<bool> {
@@ -77,6 +107,15 @@ class CheckboxFormElement extends FormElement<bool> {
     super.isRequired,
     super.initialValue,
   });
+
+  factory CheckboxFormElement.fromJson(Map json) {
+    return CheckboxFormElement(
+      field: json['title']?.toString() ?? '',
+      label: json['title']?.toString() ?? '',
+      isRequired: json['required'] as bool? ?? false,
+      initialValue: bool.tryParse(json['default']?.toString() ?? ''),
+    );
+  }
 }
 
 class DateFormElement extends FormElement<DateTime> {
@@ -96,6 +135,16 @@ class DateFormElement extends FormElement<DateTime> {
     super.initialValue,
     this.includeTime = false,
   });
+
+  factory DateFormElement.fromJson(Map json) {
+    return DateFormElement(
+      field: json['title']?.toString() ?? '',
+      label: json['title']?.toString() ?? '',
+      isRequired: json['required'] as bool? ?? false,
+      initialValue: DateTime.tryParse(json['default']?.toString() ?? ''),
+      includeTime: (json['format']?.toString() ?? '') == 'date-time',
+    );
+  }
 }
 
 class SelectFormElementOption {
@@ -105,16 +154,21 @@ class SelectFormElementOption {
     required this.value,
   });
 
+  factory SelectFormElementOption.fromJson(Map<String, dynamic> json) {
+    return SelectFormElementOption(
+      value: json['value'].toString(),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'value': value,
     };
   }
 
-  factory SelectFormElementOption.fromJson(Map<String, dynamic> json) {
-    return SelectFormElementOption(
-      value: json['value'].toString(),
-    );
+  @override
+  String toString() {
+    return value;
   }
 }
 
@@ -140,13 +194,46 @@ class SelectFormElement extends FormElement<SelectFormElementOption> {
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json['oneOf'] = options
-        .map((option) => {
-              'const': option.toJson(),
-              'type': 'string',
-              'title': option.value,
-            })
+        .map(
+          (option) => {
+            'const': option.toJson(),
+            'type': 'string',
+            'title': option.value,
+          },
+        )
         .toList();
     return json;
+  }
+
+  factory SelectFormElement.fromJson(Map json) {
+    final List<SelectFormElementOption> opts = json['oneOf'] != null
+        ? (json['oneOf'] as List)
+            .map(
+              (optionJson) => SelectFormElementOption.fromJson(
+                optionJson['const'] as Map<String, dynamic>,
+              ),
+            )
+            .toList()
+        : [];
+    SelectFormElementOption? initVal;
+
+    try {
+      if (json['default'] != null) {
+        initVal = opts.firstWhere(
+          (option) => option.value == json['default'].toString(),
+        );
+      }
+    } catch (e) {
+      // no-op
+    }
+
+    return SelectFormElement(
+      field: json['title']?.toString() ?? '',
+      label: json['title']?.toString() ?? '',
+      isRequired: json['required'] as bool? ?? false,
+      options: opts,
+      initialValue: initVal,
+    );
   }
 }
 
@@ -170,16 +257,43 @@ class FormSchema {
 
   Map<String, dynamic> toJson() {
     return {
-      //todo: saving title and desc on MCA backend so no need to save here
-      // if (title != null && title!.isNotEmpty) 'title': title,
-      // if (description != null && description!.isNotEmpty)
-      // 'description': description,
+      if (title != null && title!.isNotEmpty) 'title': title,
+      if (description != null && description!.isNotEmpty)
+        'description': description,
       'type': 'object',
       'required': requiredFields.map((e) => e.label).toList(),
       'properties': {
+        // ignore: prefer_final_in_for_each
         for (var element in elements) element.field: element.toJson(),
-      }
+      },
     };
+  }
+
+  factory FormSchema.fromJson(Map<String, dynamic> json) {
+    //{type: object, required: [First Name, Last Name], properties: {Title: {type: string, title: Title, required: false, oneOf: [{const: {value: Mr}, type: string, title: Mr}, {const: {value: Mrs}, type: string, title: Mrs}, {const: {value: Miss}, type: string, title: Miss}, {const: {value: Dr}, type: string, title: Dr}, {const: {value: Prof}, type: string, title: Prof}]}, First Name: {type: string, title: First Name, required: true}, Last Name: {type: string, title: Last Name, required: true}, Birthdate: {type: string, title: Birthdate, required: false, format: date}, Married: {type: boolean, title: Married, required: false}}}
+    final sc = FormSchema();
+    final elements = <FormElement>[];
+    for (final pr in (json['properties']! as Map).entries) {
+      switch (pr.value['type_value']) {
+        case 'text_field':
+          elements.add(TextFormElement.fromJson(pr.value as Map));
+          break;
+        case 'checkbox_field':
+          elements.add(CheckboxFormElement.fromJson(pr.value as Map));
+          break;
+        case 'date_field':
+          elements.add(DateFormElement.fromJson(pr.value as Map));
+          break;
+        case 'date_time_field':
+          elements.add(DateFormElement.fromJson(pr.value as Map));
+          break;
+        case 'select_field':
+          elements.add(SelectFormElement.fromJson(pr.value as Map));
+          break;
+      }
+    }
+    sc.elements.addAll(elements);
+    return sc;
   }
 }
 

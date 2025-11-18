@@ -33,6 +33,7 @@ class _SelectedFormFieldState
   void initState() {
     super.initState();
     // fill selected value
+
     final defaultValue = super.getDefaultValue<Object?>();
     if (defaultValue != null) {
       valueSelected = parseValue(defaultValue);
@@ -53,10 +54,30 @@ class _SelectedFormFieldState
     }
   }
 
-  SchemaProperty parseValue(Object? value) {
-    return property.oneOf.cast<SchemaProperty>().firstWhere(
-          (e) => e.constValue == value,
-        );
+  SchemaProperty? parseValue(Object? value) {
+    try {
+      final val = property.oneOf.cast<SchemaProperty>().firstWhere(
+        (e) {
+          if (e.constValue is Map && value is Map) {
+            if (e.constValue.containsKey('value') == true &&
+                value.containsKey('value')) {
+              return e.constValue['value'] == value['value'];
+            }
+          }
+          if (value is String) {
+            if (e.constValue is Map) {
+              if (e.constValue.containsKey('value') == true) {
+                return e.constValue['value'] == value;
+              }
+            }
+          }
+          return e.constValue == value;
+        },
+      );
+      return val;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -109,7 +130,7 @@ class _SelectedFormFieldState
   List<DropdownMenuItem<SchemaProperty>>? _buildItems() {
     final uiConfig = widgetBuilderInherited.uiConfig;
     int i = 0;
-    return property.oneOf
+    final list = property.oneOf
         .cast<SchemaProperty>()
         .map(
           (item) => DropdownMenuItem<SchemaProperty>(
@@ -123,6 +144,8 @@ class _SelectedFormFieldState
           ),
         )
         .toList(growable: false);
+
+    return list;
   }
 
   Map<Object?, String> _getItems() {
