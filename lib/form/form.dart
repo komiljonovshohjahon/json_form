@@ -15,7 +15,7 @@ enum FormElementType {
     format: 'date-time',
   ),
   select('string', value: 'select_field', label: 'Dropdown'),
-  file('string', value: 'file_field', label: 'File', format: 'data-url');
+  file('string', value: 'file_field', label: 'File Upload', format: 'data-url');
 
   const FormElementType(
     this.type, {
@@ -249,26 +249,45 @@ class FileFormElement extends FormElement<XFile> {
   @override
   bool get isValid => isRequired ? (initialValue != null) : true;
 
+  bool allowMultiple;
+
   FileFormElement({
     super.field,
     super.label,
     super.isRequired,
     super.initialValue,
+    this.allowMultiple = false,
   });
 
   factory FileFormElement.fromJson(Map json) {
-    print("default: ${json['default']}");
     return FileFormElement(
       field: json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
+      allowMultiple: json['allowMultiple'] as bool? ?? false,
       initialValue: json['default'] != null
+          //todo: this data is not used, just to let json_form understand there is a default value
           ? XFile.fromData(
               base64Decode(json['default'].toString()),
               name: 'Test',
             )
           : null,
     );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['allowMultiple'] = allowMultiple;
+    if (allowMultiple) {
+      json['type'] = 'array';
+      json['items'] = {
+        'type': type.type,
+        'format': type.format,
+      };
+    }
+    print(json);
+    return json;
   }
 }
 

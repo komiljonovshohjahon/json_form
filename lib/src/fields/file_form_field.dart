@@ -85,8 +85,9 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
               if (!isDownloadOnly) const SizedBox(height: 10),
               if (!isDownloadOnly) button,
               if (!isDownloadOnly) const SizedBox(height: 10),
-              ListView.builder(
+              ListView.separated(
                 shrinkWrap: true,
+                separatorBuilder: (context, index) => const Divider(height: 0),
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: field.value?.length ?? 0,
                 itemBuilder: (context, index) {
@@ -108,6 +109,16 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                           }
                         : null,
                     key: JsonFormKeys.inputFieldItem(idKey, index),
+                    leading: FutureBuilder(
+                      future: file.readAsBytes(),
+                      builder: (context, snapshot) {
+                        if (snapshot.data == null) return const SizedBox();
+                        return Image.memory(
+                          snapshot.data!,
+                          width: 80,
+                        );
+                      },
+                    ),
                     title: Text(
                       file.path.characters
                           .takeLastWhile((p0) => p0 != '/')
@@ -121,20 +132,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                               : uiConfig.fieldInput),
                     ),
                     trailing: isDownloadOnly
-                        ? kDebugMode
-                            ? FutureBuilder(
-                                future: file.readAsBytes(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.data == null)
-                                    return const SizedBox();
-                                  return Image.memory(
-                                    snapshot.data!,
-                                    width: 30,
-                                    height: 30,
-                                  );
-                                },
-                              )
-                            : const Icon(Icons.download_rounded)
+                        ? const Icon(Icons.download_rounded)
                         : IconButton(
                             icon: const Icon(Icons.close, size: 14),
                             onPressed: enabled
