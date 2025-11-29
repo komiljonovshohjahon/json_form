@@ -1,6 +1,8 @@
 import 'package:cross_file/cross_file.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
+import 'package:json_form/platform/download_file/download_file.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/shared.dart';
 
@@ -35,9 +37,16 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
     if (_previousPicker != currentPicker) {
       _customPicker = currentPicker?.call(this);
       _previousPicker = currentPicker;
+      _customPicker?.call().then(
+        (value) {
+          this.value = value;
+        },
+      );
     }
     if (_customPicker == null) throw Exception('no file handler found');
   }
+
+  bool get isDownloadOnly => property.uiSchema.readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +72,8 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
       },
       builder: (field) {
         this.field = field;
+        final button = _buildButton(uiConfig, field);
+
         return Focus(
           focusNode: focusNode,
           autofocus: property.uiSchema.autofocus,
@@ -71,9 +82,9 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
             children: [
               if (uiConfig.labelPosition != LabelPosition.table)
                 Text(uiConfig.labelText(formValue), style: uiConfig.fieldLabel),
-              const SizedBox(height: 10),
-              _buildButton(uiConfig, field),
-              const SizedBox(height: 10),
+              if (!isDownloadOnly) const SizedBox(height: 10),
+              if (!isDownloadOnly) button,
+              if (!isDownloadOnly) const SizedBox(height: 10),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -82,6 +93,20 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                   final file = field.value![index];
 
                   return ListTile(
+                    onTap: isDownloadOnly
+                        ? () {
+                            //todo: download or open file
+                            file.readAsBytes().then((value) {
+                              downloadFile(
+                                value,
+                                name: file.name,
+                                extension: file.name.characters
+                                    .takeLastWhile((p0) => p0 != '.')
+                                    .string,
+                              );
+                            });
+                          }
+                        : null,
                     key: JsonFormKeys.inputFieldItem(idKey, index),
                     title: Text(
                       file.path.characters
@@ -89,24 +114,42 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                           .string,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: readOnly
-                          ? uiConfig.fieldInputReadOnly
-                          : uiConfig.fieldInput,
+                      style: isDownloadOnly
+                          ? null
+                          : (readOnly
+                              ? uiConfig.fieldInputReadOnly
+                              : uiConfig.fieldInput),
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, size: 14),
-                      onPressed: enabled
-                          ? () {
-                              change(
-                                field,
-                                field.value!
-                                  ..removeWhere(
-                                    (element) => element.path == file.path,
-                                  ),
-                              );
-                            }
-                          : null,
-                    ),
+                    trailing: isDownloadOnly
+                        ? kDebugMode
+                            ? FutureBuilder(
+                                future: file.readAsBytes(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.data == null)
+                                    return const SizedBox();
+                                  return Image.memory(
+                                    snapshot.data!,
+                                    width: 30,
+                                    height: 30,
+                                  );
+                                },
+                              )
+                            : const Icon(Icons.download_rounded)
+                        : IconButton(
+                            icon: const Icon(Icons.close, size: 14),
+                            onPressed: enabled
+                                ? () {
+                                    change(
+                                      field,
+                                      field.value!
+                                        ..removeWhere(
+                                          (element) =>
+                                              element.path == file.path,
+                                        ),
+                                    );
+                                  }
+                                : null,
+                          ),
                   );
                 },
               ),

@@ -1,5 +1,9 @@
 // TYPES START
 
+import 'dart:convert';
+
+import 'package:cross_file/cross_file.dart';
+
 enum FormElementType {
   text('string', value: 'text_field', label: 'Text'),
   checkbox('boolean', value: 'checkbox_field', label: 'Checkbox'),
@@ -10,7 +14,8 @@ enum FormElementType {
     label: 'Date & Time',
     format: 'date-time',
   ),
-  select('string', value: 'select_field', label: 'Dropdown');
+  select('string', value: 'select_field', label: 'Dropdown'),
+  file('string', value: 'file_field', label: 'File', format: 'data-url');
 
   const FormElementType(
     this.type, {
@@ -237,6 +242,36 @@ class SelectFormElement extends FormElement<SelectFormElementOption> {
   }
 }
 
+class FileFormElement extends FormElement<XFile> {
+  @override
+  FormElementType get type => FormElementType.file;
+
+  @override
+  bool get isValid => isRequired ? (initialValue != null) : true;
+
+  FileFormElement({
+    super.field,
+    super.label,
+    super.isRequired,
+    super.initialValue,
+  });
+
+  factory FileFormElement.fromJson(Map json) {
+    print("default: ${json['default']}");
+    return FileFormElement(
+      field: json['title']?.toString() ?? '',
+      label: json['title']?.toString() ?? '',
+      isRequired: json['required'] as bool? ?? false,
+      initialValue: json['default'] != null
+          ? XFile.fromData(
+              base64Decode(json['default'].toString()),
+              name: 'Test',
+            )
+          : null,
+    );
+  }
+}
+
 // TYPES END
 
 // FORM SCHEMA START
@@ -273,7 +308,9 @@ class FormSchema {
     //{type: object, required: [First Name, Last Name], properties: {Title: {type: string, title: Title, required: false, oneOf: [{const: {value: Mr}, type: string, title: Mr}, {const: {value: Mrs}, type: string, title: Mrs}, {const: {value: Miss}, type: string, title: Miss}, {const: {value: Dr}, type: string, title: Dr}, {const: {value: Prof}, type: string, title: Prof}]}, First Name: {type: string, title: First Name, required: true}, Last Name: {type: string, title: Last Name, required: true}, Birthdate: {type: string, title: Birthdate, required: false, format: date}, Married: {type: boolean, title: Married, required: false}}}
     final sc = FormSchema();
     final elements = <FormElement>[];
+
     for (final pr in (json['properties']! as Map).entries) {
+      //todo: add new form elements here
       switch (pr.value['type_value']) {
         case 'text_field':
           elements.add(TextFormElement.fromJson(pr.value as Map));
@@ -289,6 +326,12 @@ class FormSchema {
           break;
         case 'select_field':
           elements.add(SelectFormElement.fromJson(pr.value as Map));
+          break;
+        case 'file_field':
+          elements.add(FileFormElement.fromJson(pr.value as Map));
+          break;
+        default:
+          // no-op
           break;
       }
     }
