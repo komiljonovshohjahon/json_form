@@ -15,8 +15,12 @@ enum FormElementType {
     format: 'date-time',
   ),
   select('string', value: 'select_field', label: 'Dropdown'),
-  file('string',
-      value: 'file_field', label: 'Photo Upload', format: 'data-url');
+  file(
+    'string',
+    value: 'file_field',
+    label: 'Photo Upload',
+    format: 'data-url',
+  );
 
   const FormElementType(
     this.type, {
@@ -156,20 +160,14 @@ class DateFormElement extends FormElement<DateTime> {
 class SelectFormElementOption {
   String value;
 
-  SelectFormElementOption({
-    required this.value,
-  });
+  SelectFormElementOption({required this.value});
 
   factory SelectFormElementOption.fromJson(Map<String, dynamic> json) {
-    return SelectFormElementOption(
-      value: json['value'].toString(),
-    );
+    return SelectFormElementOption(value: json['value'].toString());
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-    };
+    return {'value': value};
   }
 
   @override
@@ -214,12 +212,12 @@ class SelectFormElement extends FormElement<SelectFormElementOption> {
   factory SelectFormElement.fromJson(Map json) {
     final List<SelectFormElementOption> opts = json['oneOf'] != null
         ? (json['oneOf'] as List)
-            .map(
-              (optionJson) => SelectFormElementOption.fromJson(
-                optionJson['const'] as Map<String, dynamic>,
-              ),
-            )
-            .toList()
+              .map(
+                (optionJson) => SelectFormElementOption.fromJson(
+                  optionJson['const'] as Map<String, dynamic>,
+                ),
+              )
+              .toList()
         : [];
     SelectFormElementOption? initVal;
 
@@ -281,10 +279,7 @@ class FileFormElement extends FormElement<XFile> {
     final json = super.toJson();
     json['allowMultiple'] = allowMultiple;
     json['type'] = 'array';
-    json['items'] = {
-      'type': type.type,
-      'format': type.format,
-    };
+    json['items'] = {'type': type.type, 'format': type.format};
     return json;
   }
 }
@@ -298,14 +293,10 @@ class FormSchema {
   String? description;
   final List<FormElement> elements;
 
-  FormSchema({
-    this.title,
-    this.description,
-  }) : elements = [];
+  FormSchema({this.title, this.description}) : elements = [];
 
-  Iterable<FormElement> get requiredFields => elements.where(
-        (element) => element.isRequired,
-      );
+  Iterable<FormElement> get requiredFields =>
+      elements.where((element) => element.isRequired);
 
   Map<String, dynamic> toJson() {
     return {
@@ -331,22 +322,16 @@ class FormSchema {
       switch (pr.value['type_value']) {
         case 'text_field':
           elements.add(TextFormElement.fromJson(pr.value as Map));
-          break;
         case 'checkbox_field':
           elements.add(CheckboxFormElement.fromJson(pr.value as Map));
-          break;
         case 'date_field':
           elements.add(DateFormElement.fromJson(pr.value as Map));
-          break;
         case 'date_time_field':
           elements.add(DateFormElement.fromJson(pr.value as Map));
-          break;
         case 'select_field':
           elements.add(SelectFormElement.fromJson(pr.value as Map));
-          break;
         case 'file_field':
           elements.add(FileFormElement.fromJson(pr.value as Map));
-          break;
         default:
           // no-op
           break;

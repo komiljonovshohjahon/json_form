@@ -68,7 +68,7 @@ class _DropDownJFormFieldState
               return customValidator(value);
             },
             items: _buildItems(),
-            value: value,
+            initialValue: value,
             onChanged: enabled ? _onChanged : null,
             onSaved: onSaved,
             style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,

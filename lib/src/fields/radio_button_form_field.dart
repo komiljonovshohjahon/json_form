@@ -6,10 +6,7 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/shared.dart';
 
 class RadioButtonJFormField extends PropertyFieldWidget<Object?> {
-  const RadioButtonJFormField({
-    super.key,
-    required super.property,
-  });
+  const RadioButtonJFormField({super.key, required super.property});
 
   @override
   PropertyFieldState<Object?, RadioButtonJFormField> createState() =>
@@ -38,11 +35,9 @@ class _RadioButtonJFormFieldState
     switch (property.type) {
       case JsonSchemaType.boolean:
         values = [true, false];
-        break;
       case JsonSchemaType.integer:
       case JsonSchemaType.number:
         values = property.enumm ?? property.numberProperties.options();
-        break;
       default:
         values = (property.enumm ?? enumNames)!;
     }

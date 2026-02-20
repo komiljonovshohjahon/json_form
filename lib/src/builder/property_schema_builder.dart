@@ -39,10 +39,8 @@ class PropertySchemaBuilder extends StatelessWidget {
         case JsonSchemaType.integer:
         case JsonSchemaType.number:
           _field = NumberJFormField(property: schemaPropertySorted);
-          break;
         case JsonSchemaType.boolean:
           _field = CheckboxJFormField(property: schemaPropertySorted);
-          break;
         case JsonSchemaType.string:
         default:
           if (schemaProperty.format == PropertyFormat.date ||
@@ -57,7 +55,6 @@ class PropertySchemaBuilder extends StatelessWidget {
           }
 
           _field = TextJFormField(property: schemaPropertySorted);
-          break;
       }
     }
 

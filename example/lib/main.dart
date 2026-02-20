@@ -270,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               width: 130,
               child: DropdownButtonFormField<LabelPosition>(
-                value: labelPosition,
+                initialValue: labelPosition,
                 decoration: const InputDecoration(
                   labelText: 'Label Position',
                 ),

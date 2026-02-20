@@ -24,7 +24,7 @@ class TestUtils {
     return input;
   }
 
-  Future<Finder> tapSubmitButton() async {
+  Future<Finder> tapSubmitButton() {
     return tapButton('JsonForm_submitButton');
   }
 
@@ -81,8 +81,9 @@ class TestUtils {
     String? prop,
     Object? Function() data,
   ) async {
-    final toUpdate =
-        prop == null ? currentData : currentData[prop]! as Map<String, Object?>;
+    final toUpdate = prop == null
+        ? currentData
+        : currentData[prop]! as Map<String, Object?>;
     final propKey = prop == null ? '' : '$prop.';
 
     await tapSubmitButton();
@@ -153,9 +154,7 @@ void main() {
                 jsonSchema: primitivesJsonSchema,
                 onFormDataSaved: (p) => data = p as Map<String, Object?>,
                 controller: controller,
-                uiConfig: JsonFormUiConfig(
-                  labelPosition: labelPosition,
-                ),
+                uiConfig: JsonFormUiConfig(labelPosition: labelPosition),
                 uiSchema: primitivesUiSchema,
               );
             },
@@ -288,11 +287,10 @@ void main() {
         <Object?>[],
         ['e', 'f'],
       ][i % 4];
-      await utils.updateUiArrayCheckbox(
-        'arrayCheckbox',
-        ['e', 'f'],
-        newArrayCheckbox,
-      );
+      await utils.updateUiArrayCheckbox('arrayCheckbox', [
+        'e',
+        'f',
+      ], newArrayCheckbox);
       expect(
         updates.last.toString(),
         JsonFormUpdate(
@@ -370,13 +368,11 @@ void main() {
         await tester.pump();
         // Validate updated value in the UI
         if (value is List) {
-          expect(
-            utils.getUiArrayCheckbox('arrayCheckbox', ['e', 'f']),
-            value,
-          );
+          expect(utils.getUiArrayCheckbox('arrayCheckbox', ['e', 'f']), value);
         } else if (value is bool) {
-          final checkbox =
-              tester.firstState<FormFieldState<bool>>(find.byKey(Key(key)));
+          final checkbox = tester.firstState<FormFieldState<bool>>(
+            find.byKey(Key(key)),
+          );
           expect(checkbox.value, value);
         } else {
           expect(find.text(value.toString()), findsOne);
@@ -416,14 +412,11 @@ void main() {
     await tester.tap(arrayAdd);
     await tester.pump();
     final array1Input = await utils.findAndEnterText('array.2', 'text1');
-    expect(
-      data,
-      {
-        'integer': null,
-        'array': ['text0', 'text1'],
-        'arrayWithObjects': null,
-      },
-    );
+    expect(data, {
+      'integer': null,
+      'array': ['text0', 'text1'],
+      'arrayWithObjects': null,
+    });
     const arrayWithObjectsV = <Object?>[];
     await utils.tapSubmitButton();
     expect(data, {
@@ -488,8 +481,9 @@ void main() {
       'integer': null,
     });
 
-    final arrayWithObjectsAdd =
-        find.byKey(const Key('addItem_arrayWithObjects'));
+    final arrayWithObjectsAdd = find.byKey(
+      const Key('addItem_arrayWithObjects'),
+    );
     expect(arrayWithObjectsAdd, findsOneWidget);
     await tester.tap(arrayWithObjectsAdd);
     await tester.pump();
@@ -505,12 +499,14 @@ void main() {
       'integer': 2,
     });
 
-    final arrayWithObjectsValue =
-        find.byKey(const Key('arrayWithObjects.1.value'));
+    final arrayWithObjectsValue = find.byKey(
+      const Key('arrayWithObjects.1.value'),
+    );
     expect(arrayWithObjectsValue, findsOneWidget);
     await tester.tap(arrayWithObjectsValue);
-    final arrayWithObjectsValue2 =
-        find.byKey(const Key('arrayWithObjects.1.value2'));
+    final arrayWithObjectsValue2 = find.byKey(
+      const Key('arrayWithObjects.1.value2'),
+    );
     expect(arrayWithObjectsValue2, findsOneWidget);
     await tester.tap(arrayWithObjectsValue2);
     await utils.tapSubmitButton();
@@ -625,8 +621,9 @@ void main() {
     expect(updates[2].newValue, arrayWithObjectsField.value);
 
     if (numUpdates == 4) {
-      final arrayWithObjectsField1 =
-          controller.retrieveField('arrayWithObjects.1')!;
+      final arrayWithObjectsField1 = controller.retrieveField(
+        'arrayWithObjects.1',
+      )!;
       expect(updates.last.field, arrayWithObjectsField1);
       expect(updates.last.newValue, (arrayWithObjectsField.value! as List)[0]);
       expect(updates.last.previousValue, (previousValue! as List)[0]);
@@ -705,8 +702,9 @@ void main() {
     expect(data, <String, Object?>{});
     expect(find.text('Required'), findsOneWidget);
 
-    final valueNested =
-        find.byKey(const Key('object1.objectNested.valueNested'));
+    final valueNested = find.byKey(
+      const Key('object1.objectNested.valueNested'),
+    );
     expect(valueNested, findsOneWidget);
     await tester.tap(valueNested);
     await utils.findAndEnterText('object1.objectNested.value', 'a');
@@ -763,10 +761,7 @@ void main() {
     String? uiSchemaString = uiSchemaUiSchema;
     // TODO: inline
     final uiSchema = UiSchemaData()
-      ..setUi(
-        jsonDecode(uiSchemaString) as Map<String, Object?>,
-        parent: null,
-      );
+      ..setUi(jsonDecode(uiSchemaString) as Map<String, Object?>, parent: null);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -916,7 +911,6 @@ void main() {
           setState(() {
             uiSchemaString = jsonEncode(uiSchema.toJson());
           });
-          break;
         case 1:
           setState(() {
             uiSchemaString = null;
@@ -928,7 +922,6 @@ void main() {
               initialData: data! as Map<String, dynamic>,
             )..mainSchema = mainSchema;
           });
-          break;
         default:
       }
       await tester.pump();
@@ -978,9 +971,7 @@ void main() {
           child: JsonForm(
             jsonSchema: dependenciesJsonSchema,
             onFormDataSaved: (p) => data = p,
-            uiConfig: JsonFormUiConfig(
-              mapSchemaToTitle: (info) => info.id,
-            ),
+            uiConfig: JsonFormUiConfig(mapSchemaToTitle: (info) => info.id),
           ),
         ),
       ),
@@ -1047,10 +1038,7 @@ void main() {
       ),
     );
 
-    final Map<String, Object?> currentData = {
-      'dateTime': null,
-      'date': null,
-    };
+    final Map<String, Object?> currentData = {'dateTime': null, 'date': null};
 
     await utils.tapSubmitButton();
     expect(data, currentData);
@@ -1062,9 +1050,7 @@ void main() {
     );
 
     final now = DateTime.now();
-    await tester.tap(
-      find.byKey(ValueKey(DateTime(now.year, now.month, 5))),
-    );
+    await tester.tap(find.byKey(ValueKey(DateTime(now.year, now.month, 5))));
     await tester.tap(find.text('OK'));
     await tester.pump();
 
@@ -1081,8 +1067,8 @@ void main() {
     final hourMapped = (now.hour > 12
         ? now.hour - 12
         : now.hour == 0
-            ? 12
-            : now.hour);
+        ? 12
+        : now.hour);
     await tester.enterText(
       find
           .byWidgetPredicate(
@@ -1128,9 +1114,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: JsonFormUiConfigInherited(
-            uiConfig: JsonFormUiConfig(
-              mapSchemaToTitle: (info) => info.id,
-            ),
+            uiConfig: JsonFormUiConfig(mapSchemaToTitle: (info) => info.id),
             child: JsonForm(
               jsonSchema: oneOfDependenciesJsonSchema,
               onFormDataSaved: (p) => data = p,
@@ -1140,9 +1124,7 @@ void main() {
       ),
     );
 
-    final Map<String, Object?> currentData = {
-      'Do you have any pets?': 'No',
-    };
+    final Map<String, Object?> currentData = {'Do you have any pets?': 'No'};
     await utils.petsDependencies(currentData, null, () => data);
   });
 
@@ -1237,9 +1219,7 @@ void main() {
           child: JsonForm(
             jsonSchema: oneOfConstJsonSchema,
             onFormDataSaved: (p) => data = p,
-            uiConfig: JsonFormUiConfig(
-              mapSchemaToTitle: (info) => info.id,
-            ),
+            uiConfig: JsonFormUiConfig(mapSchemaToTitle: (info) => info.id),
           ),
         ),
       ),
@@ -1256,9 +1236,7 @@ void main() {
       warnIfMissed: false,
     );
     await tester.pump();
-    currentData['example'] = <String, Object?>{
-      'Do you have any pets?': 'No',
-    };
+    currentData['example'] = <String, Object?>{'Do you have any pets?': 'No'};
     currentData['Other Property'] = null;
 
     await utils.petsDependencies(currentData, 'example', () => data);
@@ -1283,7 +1261,8 @@ void main() {
                 fieldValidator: (field) {
                   switch (field.idKey) {
                     case 'uri':
-                      return (uri) => (uri! as String).isEmpty ||
+                      return (uri) =>
+                          (uri! as String).isEmpty ||
                               Uri.parse(uri as String).isAbsolute
                           ? null
                           : 'Should be absolute URI';
@@ -1294,8 +1273,8 @@ void main() {
                     case 'arrayCheckbox':
                       return (a) =>
                           (a! as List).contains(3) && (a as List).contains(5)
-                              ? "Can't have 3 and 5 at the same time"
-                              : null;
+                          ? "Can't have 3 and 5 at the same time"
+                          : null;
                     default:
                       return null;
                   }
@@ -1377,10 +1356,7 @@ void main() {
       'ipv6',
       currentData['ipv6'] = 'd3b5:750f:165b:13eb:ac20:ca92:83d3:63cc',
     );
-    await utils.findAndEnterText(
-      'time',
-      currentData['time'] = '06:23:10',
-    );
+    await utils.findAndEnterText('time', currentData['time'] = '06:23:10');
     await utils.findAndEnterText(
       'numberExclusive',
       (currentData['numberExclusive'] = 8).toString(),
@@ -1478,10 +1454,7 @@ void main() {
       'dateTime',
       currentData['dateTime'] = '2002-03-23 12:34:',
     );
-    await utils.findAndEnterText(
-      'time',
-      currentData['time'] = '06:2',
-    );
+    await utils.findAndEnterText('time', currentData['time'] = '06:2');
     await utils.findAndEnterText(
       'numberExclusive',
       (currentData['numberExclusive'] = 6).toString(),

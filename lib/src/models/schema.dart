@@ -38,10 +38,10 @@ enum JsonSchemaType {
         throw UnimplementedError('Union types are not implemented');
       } else {
         json = json_.cast<String>().firstWhere(
-              _notNull,
-              orElse: () =>
-                  throw UnimplementedError('Null types are not implemented'),
-            );
+          _notNull,
+          orElse: () =>
+              throw UnimplementedError('Null types are not implemented'),
+        );
       }
     } else {
       throw FormatException(
@@ -79,10 +79,10 @@ abstract class Schema implements JsonSchemaInfo {
     String? description,
     this.parent,
     List<String>? dependentsAddedBy,
-  })  : dependentsAddedBy = dependentsAddedBy ?? [],
-        _title = title,
-        _description = description,
-        oneOf = oneOf is List<Schema> ? oneOf : [] {
+  }) : dependentsAddedBy = dependentsAddedBy ?? [],
+       _title = title,
+       _description = description,
+       oneOf = oneOf is List<Schema> ? oneOf : [] {
     if (oneOf != null && oneOf is! List<Schema>) {
       _setOneOf(oneOf);
     }
@@ -110,7 +110,6 @@ abstract class Schema implements JsonSchemaInfo {
     switch (JsonSchemaType.fromJson(json['type'])) {
       case JsonSchemaType.object:
         schema = SchemaObject.fromJson(id, json, parent: parent);
-        break;
 
       case JsonSchemaType.array:
         schema = SchemaArray.fromJson(id, json, parent: parent);
@@ -118,11 +117,9 @@ abstract class Schema implements JsonSchemaInfo {
         // validate if it is a file array
         if (schema is SchemaArray && schema.isArrayMultipleFile())
           schema = schema.toSchemaPropertyMultipleFiles();
-        break;
 
       default:
         schema = SchemaProperty.fromJson(id, json, parent: parent);
-        break;
     }
 
     final uiSchema = json['ui:options'] as Map<String, dynamic>?;
@@ -162,10 +159,7 @@ abstract class Schema implements JsonSchemaInfo {
   });
 
   @mustCallSuper
-  void setUiSchema(
-    Map<String, dynamic> data, {
-    required bool fromOptions,
-  }) {
+  void setUiSchema(Map<String, dynamic> data, {required bool fromOptions}) {
     uiSchema.setUi(data, parent: parent?.uiSchema, fromOptions: fromOptions);
   }
 

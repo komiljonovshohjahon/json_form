@@ -92,7 +92,7 @@ class _SelectedFormFieldState
           child: DropdownButtonFormField<SchemaProperty>(
             key: JsonFormKeys.inputField(idKey),
             focusNode: focusNode,
-            value: valueSelected,
+            initialValue: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             validator: (value) {

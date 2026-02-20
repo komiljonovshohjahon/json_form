@@ -1,5 +1,4 @@
 import 'package:cross_file/cross_file.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
 import 'package:json_form/platform/download_file/download_file.dart';

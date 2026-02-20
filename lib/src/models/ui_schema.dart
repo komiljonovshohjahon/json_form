@@ -58,9 +58,9 @@ class UiSchemaData {
   bool copyable = true;
 
   Map<String, Object?> toJson() => {
-        'ui:options': _asJson,
-        for (final e in children.entries) e.key: e.value.toJson(),
-      };
+    'ui:options': _asJson,
+    for (final e in children.entries) e.key: e.value.toJson(),
+  };
 
   void setGlobalOptions(
     Map<String, Object?> data, {
@@ -110,83 +110,59 @@ class UiSchemaData {
       switch (k) {
         case 'disabled':
           disabled = data as bool;
-          break;
         // TODO: filePreview, label=false, type:password
         // rows/width
         case 'autofocus':
           autofocus = data as bool;
-          break;
         case 'autocomplete':
           autocomplete = data as bool;
-          break;
         case 'hideError':
           hideError = data as bool;
-          break;
         case 'width':
           width = (data as num).toDouble();
-          break;
         case 'enumDisabled':
           enumDisabled = (data as List).cast();
-          break;
         case 'enumNames':
           enumNames = (data as List).cast();
-          break;
         case 'emptyValue':
           emptyValue = data as String;
-          break;
         case 'title':
           title = data as String;
-          break;
         case 'description':
           description = data as String;
-          break;
         case 'help':
           help = data as String;
-          break;
         case 'placeholder':
           placeholder = data as String;
-          break;
         case 'readonly':
           readOnly = data as bool;
-          break;
         case 'hidden':
           hidden = data as bool;
-          break;
         case 'widget':
           // TODO: password, textarea, inputType:tel,email?
           widget = data as String;
-          break;
         case 'yearsRange':
           yearsRange = data as List<int>;
-          break;
         case 'format':
           format = data as String;
-          break;
         case 'hideNowButton':
           hideNowButton = data as bool;
-          break;
         case 'hideClearButton':
           hideClearButton = data as bool;
-          break;
         case 'order':
           order = (data as List).cast();
-          break;
 
         ///
         /// Array Properties
         ///
         case 'addable':
           addable = data as bool;
-          break;
         case 'removable':
           removable = data as bool;
-          break;
         case 'orderable':
           orderable = data as bool;
-          break;
         case 'copyable':
           copyable = data as bool;
-          break;
         case 'options':
           setUi(
             data as Map<String, Object?>,
@@ -195,10 +171,8 @@ class UiSchemaData {
             fromGlobal: fromGlobal,
           );
           saveInJson = false;
-          break;
         case 'globalOptions':
           setGlobalOptions(data as Map<String, Object?>, fromOptions: true);
-          break;
         default:
           saveInJson = false;
       }

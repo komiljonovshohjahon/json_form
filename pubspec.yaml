@@ -17,7 +17,8 @@ topics:
   - json
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
+  # sdk: ">=2.19.0 <4.0.0"
+  sdk: ^3.10.1
   flutter: ">=1.17.0"
 
 dependencies:
@@ -27,6 +28,7 @@ dependencies:
   extended_masked_text: ^3.0.1
   cross_file: ^0.3.4+1
   validators: ^3.0.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

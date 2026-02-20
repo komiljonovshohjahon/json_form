@@ -6,10 +6,7 @@ import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/utils.dart';
 
 class TextJFormField extends PropertyFieldWidget<String> {
-  const TextJFormField({
-    super.key,
-    required super.property,
-  });
+  const TextJFormField({super.key, required super.property});
 
   @override
   PropertyFieldState<String, TextJFormField> createState() =>
@@ -47,9 +44,8 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         maxLines: uiSchema.widget == 'textarea' ? null : 1,
         obscureText: uiSchema.widget == 'password',
         controller: textController,
-        onSaved: (v) => onSaved(
-          v == null || v.isEmpty ? property.uiSchema.emptyValue : v,
-        ),
+        onSaved: (v) =>
+            onSaved(v == null || v.isEmpty ? property.uiSchema.emptyValue : v),
         maxLength: property.maxLength,
         inputFormatters: [textInputCustomFormatter(property.format)],
         autovalidateMode: uiConfig.autovalidateMode,
@@ -62,10 +58,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
             return uiConfig.localizedTexts.required();
           }
           if (value != null && value.isNotEmpty) {
-            final error = uiConfig.localizedTexts.stringError(
-              property,
-              value,
-            );
+            final error = uiConfig.localizedTexts.stringError(property, value);
             if (error != null) return error;
           }
           return customValidator(value);
@@ -116,9 +109,9 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
     late TextInputFormatter textInputFormatter;
     switch (format) {
       default:
-        textInputFormatter =
-            DefaultTextInputJsonFormatter(pattern: property.pattern);
-        break;
+        textInputFormatter = DefaultTextInputJsonFormatter(
+          pattern: property.pattern,
+        );
     }
     return textInputFormatter;
   }
