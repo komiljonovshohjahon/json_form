@@ -74,6 +74,25 @@ abstract class FormElement<T> {
   }
 }
 
+extension FormElementTypeX on FormElementType {
+  FormElement createFormElement() {
+    switch (this) {
+      case FormElementType.text:
+        return TextFormElement();
+      case FormElementType.checkbox:
+        return CheckboxFormElement();
+      case FormElementType.date:
+        return DateFormElement();
+      case FormElementType.dateTime:
+        return DateFormElement(includeTime: true);
+      case FormElementType.select:
+        return SelectFormElement(options: []);
+      case FormElementType.file:
+        return FileFormElement();
+    }
+  }
+}
+
 class TextFormElement extends FormElement<String> {
   @override
   FormElementType get type => FormElementType.text;
