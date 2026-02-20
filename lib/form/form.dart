@@ -15,7 +15,8 @@ enum FormElementType {
     format: 'date-time',
   ),
   select('string', value: 'select_field', label: 'Dropdown'),
-  file('string', value: 'file_field', label: 'File Upload', format: 'data-url');
+  file('string',
+      value: 'file_field', label: 'Photo Upload', format: 'data-url');
 
   const FormElementType(
     this.type, {
@@ -279,14 +280,11 @@ class FileFormElement extends FormElement<XFile> {
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json['allowMultiple'] = allowMultiple;
-    if (allowMultiple) {
-      json['type'] = 'array';
-      json['items'] = {
-        'type': type.type,
-        'format': type.format,
-      };
-    }
-    print(json);
+    json['type'] = 'array';
+    json['items'] = {
+      'type': type.type,
+      'format': type.format,
+    };
     return json;
   }
 }
