@@ -43,6 +43,25 @@ enum FormElementType {
   }
 }
 
+extension FormElementTypeX on FormElementType {
+  FormElement createFormElement() {
+    switch (this) {
+      case FormElementType.text:
+        return TextFormElement();
+      case FormElementType.checkbox:
+        return CheckboxFormElement();
+      case FormElementType.date:
+        return DateFormElement(includeTime: false);
+      case FormElementType.dateTime:
+        return DateFormElement(includeTime: true);
+      case FormElementType.select:
+        return SelectFormElement(options: []);
+      case FormElementType.file:
+        return FileFormElement();
+    }
+  }
+}
+
 abstract class FormElement<T> {
   String field;
   String label;
@@ -65,6 +84,7 @@ abstract class FormElement<T> {
   bool get isDate => type == FormElementType.date;
   bool get isDateTime => type == FormElementType.dateTime;
   bool get isSelect => type == FormElementType.select;
+  bool get isFile => type == FormElementType.file;
 
   Map<String, dynamic> toJson() {
     return {
@@ -304,7 +324,7 @@ class FormSchema {
       if (description != null && description!.isNotEmpty)
         'description': description,
       'type': 'object',
-      'required': requiredFields.map((e) => e.label).toList(),
+      'required': requiredFields.map((e) => e.field).toList(),
       'properties': {
         // ignore: prefer_final_in_for_each
         for (var element in elements) element.field: element.toJson(),
