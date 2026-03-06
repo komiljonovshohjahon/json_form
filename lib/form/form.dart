@@ -90,12 +90,16 @@ abstract class FormElement<T> {
     return {
       'type': type.type,
       'type_value': type.value,
+      'id': field,
       'title': label,
       'required': isRequired,
       if (type.format != null) 'format': type.format,
       if (initialValue != null) 'default': initialValue.toString(),
     };
   }
+
+  String get effectiveLabel =>
+      label.isNotEmpty ? "$label${isRequired ? " *" : ""}" : field;
 }
 
 class TextFormElement extends FormElement<String> {
@@ -115,7 +119,7 @@ class TextFormElement extends FormElement<String> {
 
   factory TextFormElement.fromJson(Map json) {
     return TextFormElement(
-      field: json['title']?.toString() ?? '',
+      field: json['id']?.toString() ?? json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
       initialValue: json['default']?.toString(),
@@ -140,7 +144,7 @@ class CheckboxFormElement extends FormElement<bool> {
 
   factory CheckboxFormElement.fromJson(Map json) {
     return CheckboxFormElement(
-      field: json['title']?.toString() ?? '',
+      field: json['id']?.toString() ?? json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
       initialValue: bool.tryParse(json['default']?.toString() ?? ''),
@@ -168,7 +172,7 @@ class DateFormElement extends FormElement<DateTime> {
 
   factory DateFormElement.fromJson(Map json) {
     return DateFormElement(
-      field: json['title']?.toString() ?? '',
+      field: json['id']?.toString() ?? json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
       initialValue: DateTime.tryParse(json['default']?.toString() ?? ''),
@@ -252,7 +256,7 @@ class SelectFormElement extends FormElement<SelectFormElementOption> {
     }
 
     return SelectFormElement(
-      field: json['title']?.toString() ?? '',
+      field: json['id']?.toString() ?? json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
       options: opts,
@@ -280,7 +284,7 @@ class FileFormElement extends FormElement<XFile> {
 
   factory FileFormElement.fromJson(Map json) {
     return FileFormElement(
-      field: json['title']?.toString() ?? '',
+      field: json['id']?.toString() ?? json['title']?.toString() ?? '',
       label: json['title']?.toString() ?? '',
       isRequired: json['required'] as bool? ?? false,
       allowMultiple: json['allowMultiple'] as bool? ?? false,
